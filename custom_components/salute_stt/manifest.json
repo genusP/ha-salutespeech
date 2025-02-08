@@ -1,0 +1,13 @@
+{
+    "domain": "salute_stt",
+    "name": "SaluteSpeech STT",
+    "version": "1.0.0",
+    "config_flow": true,
+    "documentation": "",
+    "requirements": [
+        "grpcio==1.59.0"
+    ],
+    "dependencies": [],
+    "codeowners": [],
+    "iot_class": "cloud_push"
+}

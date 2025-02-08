@@ -1,0 +1,21 @@
+{
+    "title": "SaluteSpeech",
+    "config": {
+        "step": {
+            "user": {
+                "title": "Настройка подключения к SaluteSpeech Api",
+                "description": "Для подключения зарегистрируйтесь на [сайте Sber](https://developers.sber.ru/dev) и создайте проект SaluteSpeech",
+                "data": {
+                    "authentication": "Авторизационные данные (из диалога запроса ClientSecret)",
+                    "cert_path": "Путь"
+                }
+            },
+            "reconfigure_confirm": {
+                "title": "Изменение подключения к SaluteSpeech Api",
+                "data": {
+                    "authentication": "[%key:component::salute_stt::config::step::user::data::authentication%]"
+                }
+            }
+        }
+    }
+}
