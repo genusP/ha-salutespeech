@@ -1,0 +1,8 @@
+{
+    "json.schemas": [
+          {
+            "fileMatch": ["**/manifest.json"],
+            "url": "https://github.com/home-assistant/core/raw/refs/heads/dev/script/json_schemas/manifest_schema.json"
+          }
+        ]
+}

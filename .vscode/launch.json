@@ -8,9 +8,9 @@
             "name": "Python Debugger: Current File with Arguments",
             "type": "debugpy",
             "request": "launch",
-            "program": "${file}",
+            "module": "homeassistant",
             "console": "integratedTerminal",
-            "args": "--token 123 --file 100.mp3"
+            "args": [ "--debug", "-c", "/config"]
         }
     ]
 }

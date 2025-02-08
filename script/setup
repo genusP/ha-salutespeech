@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+git config --global --add safe.directory /workspaces/ha-salutespeech
+
+ln -s ./custom_components /config
+ln -s /usr/src/homeassistant/homeassistant custom_components/salute_stt/
+
+if [ ! -f /config/configuration.yaml ] 
+then echo '
+http:
+    use_x_forwarded_for: true
+    trusted_proxies:
+    - ::1
+' > /config/configuration.yaml
+fi

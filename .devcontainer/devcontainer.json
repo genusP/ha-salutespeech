@@ -1,0 +1,19 @@
+{
+    "image":"ghcr.io/home-assistant/home-assistant:2025.2",
+    "appPort": [
+        "8123:8123",
+        "5683:5683/udp"
+    ],
+    "postCreateCommand": "/bin/sh script/setup",
+    "containerEnv": {
+        "SHELL":"/bin/bash"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.vscode-pylance",
+                "ms-python.pylint"
+            ]
+        }
+    }
+}

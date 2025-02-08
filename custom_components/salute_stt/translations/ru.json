@@ -7,7 +7,7 @@
                 "description": "Для подключения зарегистрируйтесь на [сайте Sber](https://developers.sber.ru/dev) и создайте проект SaluteSpeech",
                 "data": {
                     "authentication": "Авторизационные данные (из диалога запроса ClientSecret)",
-                    "cert_path": "Путь"
+                    "cert_path": "Путь к корневому сертификату (по умолчанию сертифкат МинЦифры)"
                 }
             },
             "reconfigure_confirm": {
