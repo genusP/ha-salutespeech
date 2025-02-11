@@ -1,0 +1,12 @@
+[MAIN]
+ignore-patterns=.*_pb2(\.|_.*)py
+
+[MESSAGES CONTROL]
+disable=
+    missing-class-docstring,
+    missing-module-docstring,
+    missing-function-docstring,
+
+[TYPECHECK]
+ignored-modules=collections.abc
+generated-members=recognition_pb2.*,synthesis_pb2.*

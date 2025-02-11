@@ -1,13 +1,13 @@
 import logging
 from collections.abc import AsyncIterable
-
-from .salute_speech import SaluteSpeechCloud
 import voluptuous as vol
 
 from homeassistant.components import stt
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
+from .salute_speech import SaluteSpeechCloud
 
 _LOGGER = logging.getLogger(__name__)
 

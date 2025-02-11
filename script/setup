@@ -4,6 +4,8 @@ git config --global --add safe.directory /workspaces/ha-salutespeech
 ln -s ./custom_components /config
 ln -s /usr/src/homeassistant/homeassistant custom_components/salute_stt/
 
+pip3 install -r requirements.dev.txt
+
 if [ ! -f /config/configuration.yaml ] 
 then echo '
 http:

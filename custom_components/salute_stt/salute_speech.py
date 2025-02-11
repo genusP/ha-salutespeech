@@ -8,6 +8,7 @@ import os
 import uuid
 
 import grpc
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from . import recognition_pb2
 from . import recognition_pb2_grpc
@@ -15,7 +16,6 @@ from . import synthesis_pb2
 from . import synthesis_pb2_grpc
 
 from .const import API_AUTH_ENDPOINT
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 CHUNK_SIZE = 2048
 SLEEP_TIME = 0.1

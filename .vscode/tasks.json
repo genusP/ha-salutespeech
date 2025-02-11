@@ -1,0 +1,13 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Generate Speech API wrappers",
+            "type": "shell",
+            "command": "source script/gen.sh",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        }
+    ]
+}
