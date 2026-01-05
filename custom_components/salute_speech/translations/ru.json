@@ -7,13 +7,14 @@
                 "description": "Для подключения зарегистрируйтесь на [сайте Sber](https://developers.sber.ru/dev) и создайте проект SaluteSpeech",
                 "data": {
                     "authentication": "Авторизационные данные (из диалога запроса ClientSecret)",
-                    "cert_path": "Путь"
+                    "cert_path": "Путь к цепочке сертификатов (по умолчанию цепочка МинЦифры)"
                 }
             },
             "reconfigure_confirm": {
                 "title": "Изменение подключения к SaluteSpeech Api",
                 "data": {
-                    "authentication": "[%key:component::salute_stt::config::step::user::data::authentication%]"
+                    "authentication": "Авторизационные данные (из диалога запроса ClientSecret)",
+                    "cert_path": "Путь к цепочке сертификатов (по умолчанию цепочка МинЦифры)"
                 }
             }
         }

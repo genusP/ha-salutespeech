@@ -8,35 +8,37 @@ from homeassistant.const import CONF_AUTHENTICATION
 from homeassistant.config_entries import ConfigFlowResult
 import homeassistant.helpers.config_validation as cv
 
-from .const import DOMAIN
+from .const import DOMAIN, CONF_CA_BUNDLE
 
 _LOGGER = logging.getLogger(__name__)
 
 DATA_SCHEMA = vol.Schema({
     vol.Required(CONF_AUTHENTICATION): cv.string,
-    vol.Optional("cert_path"): cv.string
+    vol.Optional(CONF_CA_BUNDLE): cv.string
 })
 
+
 class SaluteConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    VERSION="1"
+    VERSION = "1"
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Handle the initial step."""
         if user_input is not None:
-            _LOGGER.warn("async_create_entry")
+            _LOGGER.debug("async_create_entry")
             return self.async_create_entry(
-                title="Salute Speech to text", data=user_input
+                title="Salute Speech", data=user_input
             )
 
         return self.async_show_form(step_id="user", data_schema=DATA_SCHEMA)
-    
+
     async def async_step_reconfigure(
         self, _: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Handle a reconfiguration flow initialized by the user."""
-        entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
+        entry = self.hass.config_entries.async_get_entry(
+            self.context["entry_id"])
 
         if TYPE_CHECKING:
             assert entry is not None

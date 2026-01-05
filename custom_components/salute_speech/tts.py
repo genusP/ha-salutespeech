@@ -1,13 +1,11 @@
 import logging
 from typing import Any
 import voluptuous as vol
-import homeassistant.helpers.config_validation as cv
 
 from homeassistant.components import tts
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-# from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
 from .salute_speech import SaluteSpeechCloud
 from .const import CONF_RATE, CONF_VOICE, DEFAULT_LANG, DEFAULT_VOICE, LANGUAGES, MAP_VOICES
@@ -21,25 +19,20 @@ PLATFORM_SCHEMA = tts.PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_RATE, default='24000'): vol.In(['8000', '24000']),
 })
 
+
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     async_add_entities([SaluteTTS(config_entry)])
-# async def async_get_engine(
-#     hass: HomeAssistant,
-#     config: ConfigType,
-#     discovery_info: DiscoveryInfoType | None = None,
-# ) -> tts.Provider:
-#     return SaluteTTS(config)
 
-# class SaluteTTS(tts.Provider):
+
 class SaluteTTS(tts.TextToSpeechEntity):
     _cloud: SaluteSpeechCloud
 
     def __init__(self, config_entry: ConfigEntry) -> None:
-        
+
         self.language: str = "ru"
 
         self._attr_name = "Salute TTS"
@@ -47,17 +40,17 @@ class SaluteTTS(tts.TextToSpeechEntity):
         self._attr_default_options = {
             CONF_VOICE: DEFAULT_VOICE,
             CONF_RATE: '24000'
-            }
+        }
         self._cloud = config_entry.runtime_data
-    
+
     @property
-    def default_language(self)->str:
+    def default_language(self) -> str:
         return DEFAULT_LANG
-    
+
     @property
     def supported_languages(self) -> list[str]:
         return LANGUAGES
-    
+
     @property
     def supported_options(self) -> list[str]:
         return [CONF_VOICE, CONF_RATE]
@@ -69,7 +62,7 @@ class SaluteTTS(tts.TextToSpeechEntity):
             return None
         return [tts.Voice(voice, name) for voice, name in voices.items()]
 
-
     async def async_get_tts_audio(self, message: str, language: str, options: dict[str, Any]):
-        _LOGGER.warn('async_get_tts_audio ({}, {}, {}', message, language, options)
+        _LOGGER.debug('async_get_tts_audio (%s, %s, %s)',
+                      message, language, options)
         return await self._cloud.synthesis(message, options.get(CONF_VOICE), options.get(CONF_RATE))

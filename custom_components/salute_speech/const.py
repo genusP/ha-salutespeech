@@ -1,7 +1,7 @@
-DOMAIN = "salute_stt"
+DOMAIN = "salute_speech"
 API_AUTH_ENDPOINT = 'https://ngw.devices.sberbank.ru:9443/api/v2/oauth'
 
-LANGUAGES=[
+LANGUAGES = [
     'ru-RU',
     'en-US'
 ]
@@ -20,8 +20,10 @@ MAP_VOICES = {
     }
 }
 
-CONF_VOICE='voice'
-CONF_RATE='rate'
+CONF_VOICE = 'voice'
+CONF_RATE = 'rate'
 
-DEFAULT_LANG=LANGUAGES[0]
-DEFAULT_VOICE=list(MAP_VOICES[DEFAULT_LANG].keys())[0]
+CONF_CA_BUNDLE = 'cert_path'
+
+DEFAULT_LANG = LANGUAGES[0]
+DEFAULT_VOICE = list(MAP_VOICES[DEFAULT_LANG].keys())[0]

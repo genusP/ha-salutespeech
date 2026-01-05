@@ -1,16 +1,9 @@
 #!/usr/bin/env bash
-git config --global --add safe.directory /workspaces/ha-salutespeech
+WORKSPACE=/workspaces/ha-salutespeech
+git config --global --add safe.directory $WORKSPACE
 
-ln -s ./custom_components /config
+ln -s ${WORKSPACE}/custom_components /config
+ln -s ${WORKSPACE}/configuration.yaml /config/configuration.yaml
 ln -s /usr/src/homeassistant/homeassistant custom_components/salute_stt/
 
 pip3 install -r requirements.dev.txt
-
-if [ ! -f /config/configuration.yaml ] 
-then echo '
-http:
-    use_x_forwarded_for: true
-    trusted_proxies:
-    - ::1
-' > /config/configuration.yaml
-fi

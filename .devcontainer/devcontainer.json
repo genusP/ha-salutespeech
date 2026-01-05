@@ -12,7 +12,8 @@
         "vscode": {
             "extensions": [
                 "ms-python.vscode-pylance",
-                "ms-python.pylint"
+                "ms-python.pylint",
+                "ms-python.autopep8"
             ]
         }
     }

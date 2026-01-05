@@ -9,6 +9,7 @@ import uuid
 
 import grpc
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.core import HomeAssistant
 
 from . import recognition_pb2
 from . import recognition_pb2_grpc
@@ -22,38 +23,62 @@ SLEEP_TIME = 0.1
 
 _LOGGER = logging.getLogger(__name__)
 
-async def generate_audio_chunks(options:recognition_pb2.RecognitionOptions, stream: AsyncIterable[bytes], chunk_size=CHUNK_SIZE, sleep_time=SLEEP_TIME):
+
+async def generate_audio_chunks(options: recognition_pb2.RecognitionOptions, stream: AsyncIterable[bytes], chunk_size=CHUNK_SIZE, sleep_time=SLEEP_TIME):
     yield recognition_pb2.RecognitionRequest(options=options)
-    audio=b''
+    audio = b''
     async for data in stream:
         audio += data
-        if(len(audio) + len(data) > chunk_size):
+        if (len(audio) + len(data) > chunk_size):
             yield recognition_pb2.RecognitionRequest(audio_chunk=audio)
-            audio=b''
+            audio = b''
             await asyncio.sleep(sleep_time)
     if len(audio) > 0:
         yield recognition_pb2.RecognitionRequest(audio_chunk=audio)
 
-def get_cert():
-    dir=os.path.dirname(os.path.abspath(__file__))
-    path=os.path.join(dir, 'russian_trusted_sub_ca_pem.crt')
-    _LOGGER.warn('cert path: '+ path)
+
+async def get_cert(cert_path: str | None = None) -> bytes:
+    """
+    Get certificate from either the provided path or the default bundled certificate.
+
+    Args:
+        cert_path: Path to certificate file from configuration, or None to use default.
+
+    Returns:
+        Certificate content as bytes.
+    """
+    if cert_path:
+        _LOGGER.warning('Using provided cert path: %s', cert_path)
+        path = cert_path
+    else:
+        dir = os.path.dirname(os.path.abspath(__file__))
+        path = os.path.join(dir, 'russian_trusted_ca_bundle.crt')
+        _LOGGER.debug('Using default cert path: %s', path)
+
     try:
-      f = open(path, 'rb')
-      return f.read()
-    finally:
-        f.close()
+        def _read_file():
+            with open(path, 'rb') as f:
+                return f.read()
+        return await asyncio.to_thread(_read_file)
+    except FileNotFoundError:
+        _LOGGER.error('Certificate file not found at: %s', path)
+        raise
+
 
 class SaluteSpeechCloud:
-    def __init__(self, hass, auth_data):
+    def __init__(self, hass: HomeAssistant, auth_data: str, cert_path: str | None = None):
+        self.hass = hass
+        self.auth_data = auth_data
+        self.cert_path = cert_path
         self._http_client = async_get_clientsession(hass, False)
         self._auth_data = auth_data
         self._expire_at = None
         self._channel = None
         self._current_token = None
         self._options = recognition_pb2.RecognitionOptions(
-            audio_encoding=recognition_pb2.RecognitionOptions.PCM_S16LE, 
+            audio_encoding=recognition_pb2.RecognitionOptions.PCM_S16LE,
             sample_rate=16000)
+        self._cert_path = cert_path
         self._cert = None
 
     async def recognize(self, stream: AsyncIterable[bytes]) -> str:
@@ -68,49 +93,47 @@ class SaluteSpeechCloud:
             else:
                 text = ''
                 for i, hyp in enumerate(resp.results):
-                    _LOGGER.warn(hyp)
+                    _LOGGER.debug(hyp)
                     if i == 0:
                         text = hyp.normalized_text
-                _LOGGER.debug('Got end-of-utterance result:'+text)
+                _LOGGER.debug('Got end-of-utterance result: %s', text)
                 return text
 
-    async def synthesis(self, text:str, voice:str, rate:str):
+    async def synthesis(self, text: str, voice: str, rate: str):
         is_ssml = text.find('<speak>') != -1
 
         if rate is None:
-            rate='24000'
-    
+            rate = '24000'
+
         opt = synthesis_pb2.SynthesisRequest(
             text=text,
-            content_type= synthesis_pb2.SynthesisRequest.SSML if is_ssml else synthesis_pb2.SynthesisRequest.TEXT,
-            voice='{}_{}'.format(voice, rate)
+            content_type=synthesis_pb2.SynthesisRequest.SSML if is_ssml else synthesis_pb2.SynthesisRequest.TEXT,
+            voice=f'{voice}_{rate}'
         )
-
         channel = await self.get_channel()
         stub = synthesis_pb2_grpc.SmartSpeechStub(channel)
         resp = stub.Synthesize(opt)
-        audio=b''
+        audio = b''
         async for chunk in resp:
-            audio+=chunk.data
-        # _LOGGER.warn(resp)
-        # audio = resp.data
+            audio += chunk.data
 
         return 'wav', audio
 
-    
     def disconnect(self):
         if self._channel is not None:
             self._channel.close()
             self._channel = None
-    
+
     async def get_channel(self) -> grpc.aio.Channel:
         if self._channel is None or self.is_token_expired():
             if self._channel is not None:
                 await self._channel.close()
             if self._cert is None:
-                self._cert = get_cert()
-            _LOGGER.warn('create channell')
-            ssl_cred = grpc.ssl_channel_credentials(root_certificates=self._cert)
+                self._cert = await get_cert(self.cert_path)
+
+            _LOGGER.debug('create channel')
+            ssl_cred = grpc.ssl_channel_credentials(
+                root_certificates=self._cert)
             token = await self.get_auth_token()
             token_cred = grpc.access_token_call_credentials(token)
 
@@ -122,16 +145,17 @@ class SaluteSpeechCloud:
 
     def is_token_expired(self) -> bool:
         return self._expire_at is None or self._expire_at < datetime.datetime.now()
-    
+
     async def get_auth_token(self) -> str | None:
-        _LOGGER.warn('get token')
+        _LOGGER.debug('get token')
         if not self.is_token_expired():
             return self._current_token
         async with asyncio.timeout(10):
             response = await self._http_client.post(
                 url=API_AUTH_ENDPOINT,
                 headers={
-                    'Authorization': 'Basic {}'.format(self._auth_data),
+
+                    'Authorization': f'Basic {self.auth_data}',
                     'RqUID': str(uuid.uuid4()),
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
@@ -142,13 +166,15 @@ class SaluteSpeechCloud:
 
             if response.status != HTTPStatus.OK:
                 error = await response.read()
-                _LOGGER.error('Error %d on load URL %s. Response %s' % (response.status, response.url, error))
+                _LOGGER.error('Error %d on load URL %s. Response %s',
+                              response.status, response.url, error)
                 return None
 
             data = await response.json()
-            _LOGGER.warn('auth response: '+ json.dumps( data))
+            _LOGGER.debug('auth response: %s', json.dumps(data))
 
             self._current_token = data.get('access_token')
             expire_at = float(data.get("expires_at"))/1000
-            self._expire_at = datetime.datetime.fromtimestamp(expire_at) - datetime.timedelta(seconds=5)
+            self._expire_at = datetime.datetime.fromtimestamp(
+                expire_at) - datetime.timedelta(seconds=5)
             return self._current_token

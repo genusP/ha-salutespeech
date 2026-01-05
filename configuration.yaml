@@ -1,0 +1,12 @@
+
+http:
+    use_x_forwarded_for: true
+    trusted_proxies:
+    - ::1
+
+default_config:
+
+logger:
+  default: info
+  logs:
+    custom_components.salute_speech: debug

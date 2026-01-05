@@ -1,0 +1,11 @@
+{
+    "domain": "salute_speech",
+    "name": "SaluteSpeech",
+    "version": "1.0.0",
+    "config_flow": true,
+    "documentation": "https://github.com/genusP/ha-salutespeech",
+    "codeowners": [
+        "@genusp"
+    ],
+    "iot_class": "cloud_push"
+}

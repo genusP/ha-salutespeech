@@ -11,6 +11,7 @@ from .salute_speech import SaluteSpeechCloud
 
 _LOGGER = logging.getLogger(__name__)
 
+
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: ConfigEntry,
@@ -18,17 +19,17 @@ async def async_setup_entry(
 ) -> None:
     async_add_entities([SaluteSTT(hass, config_entry)])
 
+
 class SaluteSTT(stt.SpeechToTextEntity):
     _cloud: SaluteSpeechCloud
 
     def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry) -> None:
-        
+
         self.language: str = "ru"
 
         self._attr_name = "Salute STT"
         self._attr_unique_id = f"{config_entry.entry_id[:7]}-stt"
         self._cloud = config_entry.runtime_data
-
 
     @property
     def supported_languages(self) -> list[str]:
@@ -59,19 +60,8 @@ class SaluteSTT(stt.SpeechToTextEntity):
     ) -> stt.SpeechResult:
         _LOGGER.debug("process_audio_stream start")
 
-        # audio = b""
-        # async for chunk in stream:
-        #     audio += chunk
+        text = await self._cloud.recognize(stream)
 
-        # _LOGGER.debug(f"process_audio_stream transcribe: {len(audio)} bytes")
-
-        # async with self.model_lock:
-        #     segments, _info = self.model.transcribe(
-        #         audio, beam_size=self.beam_size, language=self.language
-        #     )
-
-        text = await self._cloud.recognize(stream) # self.auth#" ".join(segment.text for segment in segments)
-
-        _LOGGER.info(f"process_audio_stream end: {text}")
+        _LOGGER.debug("process_audio_stream end: %s", text)
 
         return stt.SpeechResult(text, stt.SpeechResultState.SUCCESS)
