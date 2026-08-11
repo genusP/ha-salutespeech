@@ -1,3 +1,5 @@
+#‼️Так как Сбер закрыл тариф Freemium, а платные пакеты выходят на 2200 в месяц, проект более не планирую развивать.
+
 # SaluteSpeech (STT/TTS) для Home Assistant
 
 Добавляет в HomeAssistant поддержку распознавания речи (STT) и синтеза речи (TTS) через SaluteSpeech Api.
